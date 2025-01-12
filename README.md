@@ -8,7 +8,7 @@
 - **Tables**: Tabulate information into beautiful tables.
 - **Progress Bars**: Track the progress of long-running operations with customizable progress bars.
 - **24-bit Color Support**: Use rich, vibrant colors. If your terminal does not support 24-bit colors, Shell-Style will warn you.
-- **Markup Language**: `Shell-Style` provides a custom markup language called SSML (Shell-Style Markup Language) for implementing styles.
+- **Markup Language**: `Shell-Style` provides a custom markup language called `SSML` (Shell-Style Markup Language) for implementing styles.
 
 ## Installation
 
@@ -64,8 +64,10 @@ table = Table(2)
 table.add_row("Name", "Age")
 table.add_row("John Doe", 28)
 table.add_row("Jane Smith", 34)
-
 table.display()
+
+# Load to CSV
+table.load(path="/path/to/a/location/in/your/system", symbol=",")
 ```
 
 ### Progress Bars
@@ -75,19 +77,19 @@ Track the progress of long-running tasks with a customizable progress bar:
 ```python
 from shell_style.models import ProgressBar
 
-progress = ProgressBar(100, delay=0.5)
+progress = ProgressBar(values=100, delay=0.5)
 progress.run(style="bold")
 ```
 
 ### Using SSML
 
-Use SSML in your text to simplify styling:
+Use `SSML` (Shell-Style Markup Language) in your text to simplify styling:
 
 ```python
 from shell_style import interpret_ssml
 
-print(interpret_ssml("@boldThis is SSML@stop"))
-console.write("@boldThis is the same as the above example!@stop")
+print(interpret_ssml("<@bold>This is SSML<@stop>"))
+console.write("<@bold>This is the same as the above example!<@stop>")
 ```
 
 ## Contributing

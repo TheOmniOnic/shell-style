@@ -4,6 +4,7 @@ Supports ANSI escape codes, tables, progress bars, and more
 """
 
 from sys import stdout
+from warnings import warn
 from os import (getenv, environ)
 from .models import (ProgressBar, DEFAULT_THEME, interpret_ssml)
 
@@ -24,10 +25,10 @@ if environ.get("COLORTERM", "").lower() in ("truecolor", "24bit"):
     compatible += 1
     
 if compatible == 1:
-    print("Warning: This terminal may not be compatible with ShellStyle")
+    warn("Warning: This terminal may not be compatible with ShellStyle", Warning)
 
 if compatible == 0:
-    print("Warning: This terminal is probably not compatible with ShellStyle")
+    warn("Warning: This terminal is probably not compatible with ShellStyle", Warning)
     
 del (compatible, stdout, getenv, term)
 

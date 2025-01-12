@@ -16,11 +16,11 @@ from .constants import (
 )
 
 # Set __all__
-__all__ = ["Theme", "Console", "Table", "ProgressBar", "DEFAULT_THEME"]
+__all__ = ["Theme", "Console", "Table", "ProgressBar", "DEFAULT_THEME", "interpret_ssml"]
 
 def interpret_ssml(text: str) -> str:
     """
-    Interprets SSML (Shell-Style ssml Language) text into ANSI escape sequences for terminal styling.
+    Interprets SSML (Shell-Style Markup Language) text into ANSI escape sequences for terminal styling.
     
     Args:
         text: str 
@@ -29,34 +29,36 @@ def interpret_ssml(text: str) -> str:
     """
     
     ssml_to_ansi = {
-        "@bold": BOLD,
-        "@dim": DIM,
-        "@italic": ITALIC,
-        "@underline": UNDERLINE,
-        "@blink": BLINK,
-        "@inverse": INVERSE,
-        "@hidden": HIDDEN,
-        "@strikethrough": STRIKETHROUGH,
-        "@fg_black": FG_BLACK,
-        "@fg_red": FG_RED,
-        "@fg_green": FG_GREEN,
-        "@fg_yellow": FG_YELLOW,
-        "@fg_blue": FG_BLUE,
-        "@fg_magenta": FG_MAGENTA,
-        "@fg_cyan": FG_CYAN,
-        "@fg_white": FG_WHITE,
-        "@bg_black": BG_BLACK,
-        "@bg_red": BG_RED,
-        "@bg_green": BG_GREEN,
-        "@bg_blue": BG_BLUE,
-        "@bg_magenta": BG_MAGENTA,
-        "@bg_cyan": BG_CYAN,
-        "@bg_white": BG_WHITE,
-        "@stop": STOP,
-        "@info": FG_CYAN,
-        "@success": FG_GREEN,
-        "@warning": FG_YELLOW,
-        "@error": FG_RED
+        "<@bold>": BOLD,
+        "<@dim>": DIM,
+        "<@italic>": ITALIC,
+        "<@underline>": UNDERLINE,
+        "<@blink>": BLINK,
+        "<@inverse>": INVERSE,
+        "<@hidden>": HIDDEN,
+        "<@strikethrough>": STRIKETHROUGH,
+        "<@fg_black>": FG_BLACK,
+        "<@fg_red>": FG_RED,
+        "<@fg_green>": FG_GREEN,
+        "<@fg_yellow>": FG_YELLOW,
+        "<@fg_blue>": FG_BLUE,
+        "<@fg_magenta>": FG_MAGENTA,
+        "<@fg_cyan>": FG_CYAN,
+        "<@fg_white>": FG_WHITE,
+        "<@bg_black>": BG_BLACK,
+        "<@bg_red>": BG_RED,
+        "<@bg_green>": BG_GREEN,
+        "<@bg_blue>": BG_BLUE,
+        "<@bg_magenta>": BG_MAGENTA,
+        "<@bg_cyan>": BG_CYAN,
+        "<@bg_white>": BG_WHITE,
+        "<@stop>": STOP,
+        "<@info>": FG_CYAN,
+        "<@success>": FG_GREEN,
+        "<@warning>": FG_YELLOW,
+        "<@error>": FG_RED,
+        "<@heading>": BOLD + UNDERLINE,
+        "<@section>": INVERSE + UNDERLINE
     }
 
     for (ssml, ansi) in ssml_to_ansi.items():
@@ -74,7 +76,7 @@ class _BaseObject(ABC):
     
     @classmethod
     def help(cls) -> str:
-        return f"@fg_green{cls.__name__}@stop\n{cls.__doc__}".interpret_ssml()
+        return interpret_ssml(f"<@heading>{cls.__name__}<@stop>\n{cls.__doc__}")
 
 class Theme(_BaseObject):
     """
@@ -109,7 +111,8 @@ DEFAULT_THEME = Theme(
     underline=UNDERLINE, blink=BLINK, inverse=INVERSE, hidden=HIDDEN, strikethrough=STRIKETHROUGH, 
     fg_black=FG_BLACK, fg_white=FG_WHITE, fg_green=FG_GREEN, fg_yellow=FG_YELLOW, fg_blue=FG_BLUE, 
     fg_magenta=FG_MAGENTA, fg_cyan=FG_CYAN, bg_black=BG_BLACK, bg_red=BG_RED, bg_blue=BG_BLUE, stop=STOP,
-    bg_green=BG_GREEN, bg_magenta=BG_MAGENTA, bg_cyan=BG_CYAN, bg_white=BG_WHITE, default=DEFAULT
+    bg_green=BG_GREEN, bg_magenta=BG_MAGENTA, bg_cyan=BG_CYAN, bg_white=BG_WHITE, default=DEFAULT,
+    header=BOLD + UNDERLINE, section=INVERSE + UNDERLINE
     )
 
 class Console(_BaseObject):
@@ -264,7 +267,7 @@ class ProgressBar(_BaseObject):
                  symbol: str = "-", delay: float = 1) -> None:
         self.__values = values
         self.__theme = theme
-        self.__symbol = symbol
+        self.__symbol = interpret_ssml(symbol)
         self.__delay = delay
         
     @property
@@ -289,7 +292,7 @@ class ProgressBar(_BaseObject):
     
     @symbol.setter
     def symbol(self, new: str) -> None:
-        self.__symbol = new
+        self.__symbol = interpret_ssml(new)
         
     @property
     def delay(self) -> float:
@@ -318,15 +321,19 @@ class Table(_BaseObject):
     Table class for representing data.
     
     Args: 
-        columns: int = 0
+        columns: int = 0,
+        theme: Theme = DEFAULT_THEME
     """
     
-    def __init__(self, columns: int = 0) -> None:
+    def __init__(self, columns: int = 0, theme: Theme = DEFAULT) -> None:
         self.__columns = columns
+        if columns < 0:
+            self.__columns = 0
+        self.__theme = theme
         self.__rows = 0
         self.__table = []
         
-    def add_row(self, *objects: Any) -> None:
+    def add_row(self, *objects: Any, style: str = "default") -> None:
         """
         Add a row to self.__table.
         
@@ -343,6 +350,9 @@ class Table(_BaseObject):
             
         while len(objects) > self.__columns:
             objects.pop()
+            
+        for object in objects:
+            object = interpret_ssml(self.__theme.get_style(style) + object + STOP)
             
         self.__table.append(objects)
         self.__rows += 1
@@ -375,7 +385,7 @@ class Table(_BaseObject):
             
         self.__columns -= 1
         
-    def add_column(self, placeholder: Any = "") -> None:
+    def add_column(self, placeholder: Any = "", style: str = "default") -> None:
         """
         Add a column in self.__table.
         
@@ -384,6 +394,8 @@ class Table(_BaseObject):
             
         Returns: None
         """
+        
+        placeholder = interpret_ssml(self.__theme.get_style(style) + placeholder + STOP)
         
         for row in self.__table:
             row.append(placeholder)
@@ -403,7 +415,7 @@ class Table(_BaseObject):
         
         return self.__table[row_index][column_index]
     
-    def set_column(self, info: Any, row_index: int, column_index: int) -> None:
+    def set_column(self, info: Any, row_index: int, column_index: int, style: str = "default") -> None:
         """
         Set the information in a column in self.__table.
         
@@ -415,7 +427,7 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        self.__table[row_index][column_index] = info
+        self.__table[row_index][column_index] = interpret_ssml(self.__theme.get_style(style) + info + STOP)
         
     def get_row(self, index: int) -> list:
         """
@@ -448,6 +460,40 @@ class Table(_BaseObject):
     def display(self) -> None:
         print(self.get_table())
         
+    def symbol_separated_values(self, symbol: str = ",") -> str:
+        """
+        Turn self.__table into a symbol separated format, like CSV, TSV, SSV or PSV.
+        
+        Args:
+            symbol: str = ","
+            
+        Returns: str
+        """
+        
+        text = ""
+        
+        for row in self.__table:
+            for column in row: 
+                text += f"\"{column}\"{symbol}"
+                
+            text += "\n"
+            
+        return text
+    
+    def load(self, path: str, symbol: str = ",") -> None:
+        """
+        Load self.__table into a file, typically a CSV, TSV, SSV or PSV.
+        
+        Args:
+            path: str,
+            symbol: str = ","
+            
+        Returns: None
+        """
+        
+        with open(path, "w") as file:
+            file.write(self.symbol_separated_values(symbol))
+        
     @property
     def rows(self) -> int:
         return self.__rows
@@ -457,6 +503,14 @@ class Table(_BaseObject):
         return self.__columns
     
     @property
-    def table(self) -> list[list]:
+    def table(self) -> list[list[Any]]:
         return self.__table
+    
+    @property
+    def theme(self) -> Theme:
+        return self.__theme
+    
+    @theme.setter
+    def theme(self, new: Theme) -> None:
+        self.__theme = new
     
