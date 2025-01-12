@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="shell-style",  
-    version="0.0.2",
-    description="A terminal text formatting package with 24-bit color support",
+    version="0.0.4",
+    description="A terminal formatting package with 24-bit color support",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="TheOmniOnic",  
@@ -12,7 +12,7 @@ setup(
     include_package_data=True,
     install_requires=[],
     url="https://github.com/TheOmniOnic/shell-style",
-    python_requires=">=3.6",  
+    python_requires=">=3.12.0",  
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",

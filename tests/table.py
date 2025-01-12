@@ -2,7 +2,6 @@ from unittest import TestCase, main
 from shell_style.models import Table
 
 class TestTable(TestCase):
-
     def setUp(self):
         self.table = Table(columns=3)
 
@@ -35,6 +34,13 @@ class TestTable(TestCase):
         self.table.add_row(1, 2, 3)
         table_str = self.table.get_table()
         self.assertIn("| 1 | 2 | 3 |", table_str)
-    
+        self.assertTrue(table_str.startswith("|"))
+
+    def test_edge_cases(self):
+        self.table.add_row(1, 2)  # Add row with fewer values
+        self.assertEqual(self.table.get_row(0), [1, 2, None])
+        self.table.add_row(1, 2, 3, 4)  # Add row with excess values
+        self.assertEqual(self.table.get_row(1), [1, 2, 3])
+
 if __name__ == "__main__":
     main()

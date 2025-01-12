@@ -7,10 +7,62 @@ from time import sleep
 from os import get_terminal_size
 from abc import ABC
 from typing import Any
-from .constants import *
+from .constants import (
+    FG_CYAN, FG_YELLOW, FG_RED, FG_GREEN, BOLD, DIM, ITALIC, 
+    UNDERLINE, BLINK, INVERSE, HIDDEN, STRIKETHROUGH, 
+    FG_BLACK, FG_WHITE, FG_BLUE, FG_MAGENTA, BG_BLACK, 
+    BG_RED, BG_GREEN, BG_BLUE, BG_MAGENTA, BG_CYAN, 
+    BG_WHITE, STOP, CENTER, RIGHT, LEFT, CLEAR, DEFAULT
+)
 
 # Set __all__
 __all__ = ["Theme", "Console", "Table", "ProgressBar", "DEFAULT_THEME"]
+
+def interpret_ssml(text: str) -> str:
+    """
+    Interprets SSML (Shell-Style ssml Language) text into ANSI escape sequences for terminal styling.
+    
+    Args:
+        text: str 
+        
+    Returns: str 
+    """
+    
+    ssml_to_ansi = {
+        "@bold": BOLD,
+        "@dim": DIM,
+        "@italic": ITALIC,
+        "@underline": UNDERLINE,
+        "@blink": BLINK,
+        "@inverse": INVERSE,
+        "@hidden": HIDDEN,
+        "@strikethrough": STRIKETHROUGH,
+        "@fg_black": FG_BLACK,
+        "@fg_red": FG_RED,
+        "@fg_green": FG_GREEN,
+        "@fg_yellow": FG_YELLOW,
+        "@fg_blue": FG_BLUE,
+        "@fg_magenta": FG_MAGENTA,
+        "@fg_cyan": FG_CYAN,
+        "@fg_white": FG_WHITE,
+        "@bg_black": BG_BLACK,
+        "@bg_red": BG_RED,
+        "@bg_green": BG_GREEN,
+        "@bg_blue": BG_BLUE,
+        "@bg_magenta": BG_MAGENTA,
+        "@bg_cyan": BG_CYAN,
+        "@bg_white": BG_WHITE,
+        "@stop": STOP,
+        "@info": FG_CYAN,
+        "@success": FG_GREEN,
+        "@warning": FG_YELLOW,
+        "@error": FG_RED
+    }
+
+    for (ssml, ansi) in ssml_to_ansi.items():
+        text = text.replace(ssml, ansi)
+
+    return text
 
 class _BaseObject(ABC):
     """
@@ -22,7 +74,7 @@ class _BaseObject(ABC):
     
     @classmethod
     def help(cls) -> str:
-        return f"""{FG_CYAN}{cls.__name__}{STOP}\n{cls.__doc__}"""
+        return f"@fg_green{cls.__name__}@stop\n{cls.__doc__}".interpret_ssml()
 
 class Theme(_BaseObject):
     """
@@ -33,24 +85,32 @@ class Theme(_BaseObject):
     """
     
     def __init__(self, **styles) -> None:
-        self._styles = styles
+        self.__styles = styles
         
     @property
-    def styles(self) -> dict[str, Any]:
-        return self._styles
+    def styles(self) -> dict[str, str]:
+        return self.__styles
     
     @styles.setter
-    def styles(self, **styles) -> None:
-        self._styles.update(styles)
+    def styles(self, styles: dict[str, str]) -> None:
+        self.__styles.update(styles)
         
     def get_style(self, target: str) -> str:
-        return self._styles.get(target)
+        return self.__styles.get(target)
+    
+    def __getitem__(self, target: str) -> Any:
+        return self.__styles.get(target)
+    
+    def __setitem__(self, style: str, value: str) -> None:
+        self.__styles[style] = value
 
-DEFAULT_THEME = Theme(info=FG_CYAN, warning=FG_YELLOW, error=FG_RED, success=FG_GREEN, bold=BOLD, dim=DIM, italic=ITALIC, 
-                    underline=UNDERLINE, blink=BLINK, inverse=INVERSE, hidden=HIDDEN, strikethrough=STRIKETHROUGH, 
-                    fg_black=FG_BLACK,fg_white=FG_WHITE, fg_green=FG_GREEN, fg_yellow=FG_YELLOW, fg_blue=FG_BLUE, 
-                    fg_magenta=FG_MAGENTA, fg_cyan=FG_CYAN, bg_black=BG_BLACK, bg_red=BG_RED, bg_green=BG_GREEN, 
-                    bg_yellow=BG_YELLOW, bg_blue=BG_BLUE, bg_magenta=BG_MAGENTA, bg_cyan=BG_CYAN, bg_white=BG_WHITE)
+DEFAULT_THEME = Theme(
+    info=FG_CYAN, warning=FG_YELLOW, error=FG_RED, success=FG_GREEN, bold=BOLD, dim=DIM, italic=ITALIC, 
+    underline=UNDERLINE, blink=BLINK, inverse=INVERSE, hidden=HIDDEN, strikethrough=STRIKETHROUGH, 
+    fg_black=FG_BLACK, fg_white=FG_WHITE, fg_green=FG_GREEN, fg_yellow=FG_YELLOW, fg_blue=FG_BLUE, 
+    fg_magenta=FG_MAGENTA, fg_cyan=FG_CYAN, bg_black=BG_BLACK, bg_red=BG_RED, bg_blue=BG_BLUE, stop=STOP,
+    bg_green=BG_GREEN, bg_magenta=BG_MAGENTA, bg_cyan=BG_CYAN, bg_white=BG_WHITE, default=DEFAULT
+    )
 
 class Console(_BaseObject):
     """
@@ -62,30 +122,30 @@ class Console(_BaseObject):
     """
     
     def __init__(self, title: str, theme: Theme = DEFAULT_THEME, print_title: bool = True) -> None:
-        self._title = title
-        self._theme = theme
+        self.__title = title
+        self.__theme = theme
         
         if print_title:
             self.print_title()
         
     def print_title(self) -> None:
-        self.write(f"{BOLD}{UNDERLINE}{self._title}{STOP}", alignment=CENTER)
+        self.write(f"@bold@underline{self.__title}@stop", alignment=CENTER)
         
     @property
     def theme(self) -> Theme:
-        return self._theme
+        return self.__theme
     
     @theme.setter
-    def theme(self, new: Theme = DEFAULT_THEME) -> None:
-        self._theme = new
+    def theme(self, new: Theme) -> None:
+        self.__theme = new
         
     @property
     def title(self) -> str:
-        return self._title
+        return self.__title
     
     @title.setter
     def title(self, new: str) -> None:
-        self._title = new
+        self.__title = new
     
     def clear(self, print_title: bool = True) -> None:
         """
@@ -101,14 +161,14 @@ class Console(_BaseObject):
         if print_title:
             self.print_title()
         
-    def log(self, text: Any, *, end: str = f"{STOP}\n", 
-            sep: str = " ", style: str = "default", alignment: str = LEFT) -> None:
+    def log(self, *objects, end: str = f"{STOP}\n", sep: str = " ", 
+            style: str = "default", alignment: str = LEFT) -> None:
         """
         Customized log method.
         
         Args: 
-            text: Any, 
-            end: str = f"{STOP}\n",
+            *objects: Any, 
+            end: str = f"{STOP}\\n",
             alignment: str = LEFT,
             sep: str = " ", 
             style: str = "default"
@@ -116,15 +176,17 @@ class Console(_BaseObject):
         Returns: None
         """
         
-        print(self._align_text(self._theme.get_style(style) + text, alignment), end=end, sep=sep)
+        print(
+        interpret_ssml(self.__align_text(self.__theme.get_style(style) + "".join(map(str, objects)), alignment)), end=end, sep=sep
+            )
             
-    def write(self, text: Any, *, alignment: str = LEFT, end: str = f"{STOP}\n", 
+    def write(self, *objects: Any, alignment: str = LEFT, end: str = f"{STOP}\n", 
               sep: str = " ", style: str = "default") -> None:
         """
         Customized print method.
         
         Args:
-            text: Any,
+            *objects: Any,
             alignment: str, 
             end: str = STOP, 
             sep: str = "", 
@@ -133,26 +195,35 @@ class Console(_BaseObject):
         Returns: None
         """
         
-        print(self._align_text(self._theme.get_style(style) + text, alignment), end=end, sep=sep)
+        print(
+        interpret_ssml(self.__align_text(self.__theme.get_style(style) + "".join(map(str, objects)), alignment)), end=end, sep=sep
+            )
         
-    def prompt(self, text: Any, *, end: str = STOP, style: str = "default") -> str:
+    def prompt(self, *objects, end: str = STOP, style: str = "default") -> str:
         """
         Customized input method.
         
         Args:
-            text: Any,
+            *objects: Any,
             end: str = STOP, 
             style: str
         
         Returns: str
         """
         
-        return input(self._theme.get_style(style) + text + end)
+        try:
+            text = input(interpret_ssml(self.__theme.get_style(style) + "".join(map(str, objects))) + end)
+        
+        except EOFError:
+            return ""
+        
+        else:
+            return text
     
     @staticmethod
-    def _align_text(text: Any, alignment: str) -> str | None:
+    def __align_text(text: Any, alignment: str) -> str:
         """
-        Private static method for text alignment
+        Private static method for text alignment.
         
         Args:
             text: Any, 
@@ -162,6 +233,7 @@ class Console(_BaseObject):
         
         Raises: ValueError (if alignment is not valid)
         """
+        
         width = get_terminal_size().columns
         
         if alignment == CENTER:
@@ -175,7 +247,7 @@ class Console(_BaseObject):
             return (text + " " * (width - len(text))).lstrip(" ")
         
         else:
-            raise ValueError(f"Invalid argument for function 'Console._align_text': {alignment}")
+            raise ValueError(f"Invalid argument for function 'Console.__align_text': {alignment}")
     
 class ProgressBar(_BaseObject):
     """
@@ -188,62 +260,58 @@ class ProgressBar(_BaseObject):
         delay: float = 1
     """
     
-    def __init__(self, values: int, *, theme: Theme = DEFAULT_THEME, symbol: str = "-", 
-                 delay: float = 1) -> None:
-        self._values = values
-        self._theme = theme
-        self._symbol = symbol
-        self._delay = delay
+    def __init__(self, values: int, *, theme: Theme = DEFAULT_THEME, 
+                 symbol: str = "-", delay: float = 1) -> None:
+        self.__values = values
+        self.__theme = theme
+        self.__symbol = symbol
+        self.__delay = delay
         
     @property
     def values(self) -> int:
-        return self._values
+        return self.__values
     
     @values.setter
     def values(self, new: int) -> None:
-        self._values = new
+        self.__values = new
         
     @property
     def theme(self) -> Theme:
-        return self._theme
+        return self.__theme
     
     @theme.setter
     def theme(self, new: Theme) -> None:
-        self._theme = new
+        self.__theme = new
         
     @property
     def symbol(self) -> str:
-        return self._symbol
+        return self.__symbol
     
     @symbol.setter
     def symbol(self, new: str) -> None:
-        self._symbol = new
+        self.__symbol = new
         
     @property
     def delay(self) -> float:
-        return self._delay
+        return self.__delay
     
     @delay.setter
     def delay(self, new: float) -> None:
-        self._delay = new
+        self.__delay = new
         
-    def run(self, style: str = "default", del_self: bool = False) -> None:
+    def run(self, style: str = "default") -> None:
         """
         Run the progress bar.
         
         Args:
             style: str = "default",
-            del_self: bool = False
             
         Returns: None
         """
         
-        for _ in range(self._values):
-            print(self._theme.get_style(style) + self._symbol, end=STOP, flush=True)
-            sleep(self._delay)
-            
-        if del_self:
-            del self
+        for _ in range(self.__values):
+            print(self.__theme.get_style(style) + self.__symbol, end=STOP, flush=True)
+            sleep(self.__delay)
             
 class Table(_BaseObject):
     """
@@ -254,13 +322,13 @@ class Table(_BaseObject):
     """
     
     def __init__(self, columns: int = 0) -> None:
-        self._columns = columns
-        self._rows = 0
-        self._table = []
+        self.__columns = columns
+        self.__rows = 0
+        self.__table = []
         
     def add_row(self, *objects: Any) -> None:
         """
-        Add a row to self._table.
+        Add a row to self.__table.
         
         Args:
             *objects: Any
@@ -270,18 +338,18 @@ class Table(_BaseObject):
         
         objects = list(objects)
         
-        while len(objects) < self._columns:
+        while len(objects) < self.__columns:
             objects.append(None)
             
-        while len(objects) > self._columns:
+        while len(objects) > self.__columns:
             objects.pop()
             
-        self._table.append(objects)
-        self._rows += 1
+        self.__table.append(objects)
+        self.__rows += 1
         
     def del_row(self, index: int) -> None:
         """
-        Delete a row in self._table.
+        Delete a row in self.__table.
         
         Args:
             index: int
@@ -289,12 +357,12 @@ class Table(_BaseObject):
         Returns: None    
         """
         
-        del self._table[index]
-        self._rows -= 1
+        del self.__table[index]
+        self.__rows -= 1
         
     def del_column(self, index: int) -> None:
         """
-        Delete a column in self._table.
+        Delete a column in self.__table.
         
         Args:
             index: int
@@ -302,14 +370,14 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        for row in self._table:
+        for row in self.__table:
             del row[index]
             
-        self._columns -= 1
+        self.__columns -= 1
         
     def add_column(self, placeholder: Any = "") -> None:
         """
-        Add a column in self._table.
+        Add a column in self.__table.
         
         Args:
             placeholder: Any = ""
@@ -317,14 +385,14 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        for row in self._table:
+        for row in self.__table:
             row.append(placeholder)
         
-        self._columns += 1
+        self.__columns += 1
             
     def get_column(self, row_index: int, column_index: int) -> Any:
         """
-        Get the information in a column in self._table.
+        Get the information in a column in self.__table.
         
         Args:
             row_index: int,
@@ -333,11 +401,11 @@ class Table(_BaseObject):
         Returns: Any
         """
         
-        return self._table[row_index][column_index]
+        return self.__table[row_index][column_index]
     
     def set_column(self, info: Any, row_index: int, column_index: int) -> None:
         """
-        Set the information in a column in self._table.
+        Set the information in a column in self.__table.
         
         Args:
             info: Any,
@@ -347,11 +415,11 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        self._table[row_index][column_index] = info
+        self.__table[row_index][column_index] = info
         
     def get_row(self, index: int) -> list:
         """
-        Returns a row in self._table.
+        Returns a row in self.__table.
         
         Args:
             index: int
@@ -359,11 +427,11 @@ class Table(_BaseObject):
         Returns: list
         """
         
-        return self._table[index]
+        return self.__table[index]
     
     def get_table(self) -> str:
         """
-        Return a string representation of self._table.
+        Return a string representation of self.__table.
         
         Args: None
         
@@ -372,7 +440,7 @@ class Table(_BaseObject):
         
         return_str = ""
         
-        for row in self._table:
+        for row in self.__table:
             return_str += "| " + " | ".join(str(cell) if cell is not None else "" for cell in row) + " |" + "\n"
             
         return return_str
@@ -382,13 +450,13 @@ class Table(_BaseObject):
         
     @property
     def rows(self) -> int:
-        return self._rows
+        return self.__rows
     
     @property
     def columns(self) -> int:
-        return self._columns
+        return self.__columns
     
     @property
     def table(self) -> list[list]:
-        return self._table
+        return self.__table
     

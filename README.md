@@ -8,6 +8,7 @@
 - **Tables**: Tabulate information into beautiful tables.
 - **Progress Bars**: Track the progress of long-running operations with customizable progress bars.
 - **24-bit Color Support**: Use rich, vibrant colors. If your terminal does not support 24-bit colors, Shell-Style will warn you.
+- **Markup Language**: `Shell-Style` provides a custom markup language called SSML (Shell-Style Markup Language) for implementing styles.
 
 ## Installation
 
@@ -24,16 +25,16 @@ python3 -m pip install shell-style
 You can format text using various styles. For example:
 
 ```python
-from shell_style import Console, Theme, rgb_to_ansi
+from shell_style.models import (Console, Theme, rgb_to_ansi)
 
 console = Console("MyConsole")
-console.print("This is bold text", style="bold")
-console.print("This is underlined text", style="underline")
+console.write("This is bold text", style="bold")
+console.write("This is underlined text", style="underline")
 
 theme1 = Theme(my_style=rgb_to_ansi(237, 234, 154))
 console.theme = theme1
 
-console.print("This is custom text", style="my_style")
+console.write("This is custom text", style="my_style")
 ```
 
 ### RGB to ANSI Conversion
@@ -44,12 +45,12 @@ Use `Shell-Style`'s functions to use RGB and HEX colors too:
 from shell_style import rgb_to_ansi
 
 ansi_code = rgb_to_ansi(255, 0, 0)  # Red color
-console.print(f"Your RGB to ANSI code: {ansi_code}")
+console.write(f"Your RGB to ANSI code: {ansi_code}")
 
 from shell_style import hex_to_ansi
 
 ansi_code = hex_to_ansi("#FF5733")  # Hex color code
-console.print(f"Your Hex to ANSI code: {ansi_code}")
+console.write(f"Your Hex to ANSI code: {ansi_code}")
 ```
 
 ### Tables
@@ -57,7 +58,7 @@ console.print(f"Your Hex to ANSI code: {ansi_code}")
 Create tabulated output with dynamic content:
 
 ```python
-from shell_style import Table
+from shell_style.models import Table
 
 table = Table(2)
 table.add_row("Name", "Age")
@@ -72,10 +73,21 @@ table.display()
 Track the progress of long-running tasks with a customizable progress bar:
 
 ```python
-from shell_style import ProgressBar
+from shell_style.models import ProgressBar
 
 progress = ProgressBar(100, delay=0.5)
 progress.run(style="bold")
+```
+
+### Using SSML
+
+Use SSML in your text to simplify styling:
+
+```python
+from shell_style import interpret_ssml
+
+print(interpret_ssml("@boldThis is SSML@stop"))
+console.write("@boldThis is the same as the above example!@stop")
 ```
 
 ## Contributing

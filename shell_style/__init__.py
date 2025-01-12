@@ -3,44 +3,33 @@ ShellStyle: A Python Package for styling terminal output.
 Supports ANSI escape codes, tables, progress bars, and more
 """
 
-from sys import stdout as _stdout
-from os import (getenv as _getenv, environ as _environ)
-from .models import *
-from .constants import *
+from sys import stdout
+from os import (getenv, environ)
+from .models import (ProgressBar, DEFAULT_THEME, interpret_ssml)
 
-def _check_terminal_compatibility() -> None:
-    """
-    Checks whether the stdout is a TTY and whether 
-    "xterm" or "color" are in getenv(term) and 
-    increments compatible based on the conditions'
-    accuracy. If compatible is 0, the terminal is 
-    most probably incompatible with ANSI escape codes.
+# Set __all__
+__all__ = ["rgb_to_ansi", "hex_to_ansi", "run_progress_bar", "DEFAULT_THEME", "interpret_ssml"]
+
+# Check whether the terminal is compatible with Shell-STyle    
+compatible = 0
+
+if stdout.isatty():
+    compatible += 1
     
-    Args: None
+term = getenv("TERM", "")
+if term and ("xterm" in term or "color" in term):
+    compatible += 1
     
-    Returns: int 
-    """
+if environ.get("COLORTERM", "").lower() in ("truecolor", "24bit"):
+    compatible += 1
     
-    compatible = 0
+if compatible == 1:
+    print("Warning: This terminal may not be compatible with ShellStyle")
+
+if compatible == 0:
+    print("Warning: This terminal is probably not compatible with ShellStyle")
     
-    if _stdout.isatty():
-        compatible += 1
-        
-    term = _getenv("TERM", "")
-    if term and ("xterm" in term or "color" in term):
-        compatible += 1
-        
-    if _environ.get("COLORTERM", "").lower() in ("truecolor", "24bit"):
-        compatible += 1
-        
-    if compatible == 1:
-        print("Warning: This terminal may not be compatible with ShellStyle")
-    
-    if compatible == 0:
-        print("Warning: This terminal is probably not compatible with ShellStyle")
-    
-_check_terminal_compatibility()
-del _check_terminal_compatibility
+del (compatible, stdout, getenv, term)
 
 # Define rgb_to_ansi() and hex_to_ansi() based on whether the terminal is 
 # compatible with 24-bit colors
@@ -100,5 +89,7 @@ def run_progress_bar(values: int, *, delay: float = 1, symbol: str = "-") -> Non
         """
         
         progress_bar = ProgressBar(values)
-        progress_bar.run(del_self=True)
+        progress_bar.run()
+        
+del ProgressBar
         
