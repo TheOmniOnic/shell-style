@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="shell-style",  
-    version="0.0.6",
+    version="0.1.1",
     description="A terminal formatting package with 24-bit color support",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

@@ -132,7 +132,7 @@ class Console(_BaseObject):
             self.print_title()
         
     def print_title(self) -> None:
-        self.write(f"@bold@underline{self.__title}@stop", alignment=CENTER)
+        self.write(f"<@heading>{self.__title}<@stop>", alignment=CENTER)
         
     @property
     def theme(self) -> Theme:
@@ -325,7 +325,7 @@ class Table(_BaseObject):
         theme: Theme = DEFAULT_THEME
     """
     
-    def __init__(self, columns: int = 0, theme: Theme = DEFAULT) -> None:
+    def __init__(self, columns: int = 0, theme: Theme = DEFAULT_THEME) -> None:
         self.__columns = columns
         if columns < 0:
             self.__columns = 0
@@ -343,18 +343,18 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        objects = list(objects)
+        interpreted_objects = []
         
-        while len(objects) < self.__columns:
-            objects.append(None)
+        for obj in objects:
+            interpreted_objects.append(interpret_ssml(self.__theme.get_style(style) + str(obj) + STOP))
             
-        while len(objects) > self.__columns:
-            objects.pop()
+        while len(interpreted_objects) < self.__columns:
+            interpreted_objects.append(None)
             
-        for object in objects:
-            object = interpret_ssml(self.__theme.get_style(style) + object + STOP)
+        while len(interpreted_objects) > self.__columns:
+            interpreted_objects.pop()
             
-        self.__table.append(objects)
+        self.__table.append(interpreted_objects)
         self.__rows += 1
         
     def del_row(self, index: int) -> None:
@@ -395,7 +395,7 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        placeholder = interpret_ssml(self.__theme.get_style(style) + placeholder + STOP)
+        placeholder = interpret_ssml(self.__theme.get_style(style) + str(placeholder) + STOP)
         
         for row in self.__table:
             row.append(placeholder)
@@ -427,7 +427,7 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        self.__table[row_index][column_index] = interpret_ssml(self.__theme.get_style(style) + info + STOP)
+        self.__table[row_index][column_index] = interpret_ssml(self.__theme.get_style(style) + str(info) + STOP)
         
     def get_row(self, index: int) -> list:
         """
