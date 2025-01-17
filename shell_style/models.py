@@ -7,64 +7,11 @@ from time import sleep
 from os import get_terminal_size
 from abc import ABC
 from typing import Any
-from .constants import (
-    FG_CYAN, FG_YELLOW, FG_RED, FG_GREEN, BOLD, DIM, ITALIC, 
-    UNDERLINE, BLINK, INVERSE, HIDDEN, STRIKETHROUGH, 
-    FG_BLACK, FG_WHITE, FG_BLUE, FG_MAGENTA, BG_BLACK, 
-    BG_RED, BG_GREEN, BG_BLUE, BG_MAGENTA, BG_CYAN, 
-    BG_WHITE, STOP, CENTER, RIGHT, LEFT, CLEAR, DEFAULT
-)
+from .ssml import interpret
+from .enums import (Styles, BackgroundColors, ForegroundColors, Other)
 
 # Set __all__
-__all__ = ["Theme", "Console", "Table", "ProgressBar", "DEFAULT_THEME", "interpret_ssml"]
-
-def interpret_ssml(text: str) -> str:
-    """
-    Interprets SSML (Shell-Style Markup Language) text into ANSI escape sequences for terminal styling.
-    
-    Args:
-        text: str 
-        
-    Returns: str 
-    """
-    
-    ssml_to_ansi = {
-        "<@bold>": BOLD,
-        "<@dim>": DIM,
-        "<@italic>": ITALIC,
-        "<@underline>": UNDERLINE,
-        "<@blink>": BLINK,
-        "<@inverse>": INVERSE,
-        "<@hidden>": HIDDEN,
-        "<@strikethrough>": STRIKETHROUGH,
-        "<@fg_black>": FG_BLACK,
-        "<@fg_red>": FG_RED,
-        "<@fg_green>": FG_GREEN,
-        "<@fg_yellow>": FG_YELLOW,
-        "<@fg_blue>": FG_BLUE,
-        "<@fg_magenta>": FG_MAGENTA,
-        "<@fg_cyan>": FG_CYAN,
-        "<@fg_white>": FG_WHITE,
-        "<@bg_black>": BG_BLACK,
-        "<@bg_red>": BG_RED,
-        "<@bg_green>": BG_GREEN,
-        "<@bg_blue>": BG_BLUE,
-        "<@bg_magenta>": BG_MAGENTA,
-        "<@bg_cyan>": BG_CYAN,
-        "<@bg_white>": BG_WHITE,
-        "<@stop>": STOP,
-        "<@info>": FG_CYAN,
-        "<@success>": FG_GREEN,
-        "<@warning>": FG_YELLOW,
-        "<@error>": FG_RED,
-        "<@heading>": BOLD + UNDERLINE,
-        "<@section>": INVERSE + UNDERLINE
-    }
-
-    for (ssml, ansi) in ssml_to_ansi.items():
-        text = text.replace(ssml, ansi)
-
-    return text
+__all__ = ["Theme", "Console", "Table", "ProgressBar", "DEFAULT_THEME"]
 
 class _BaseObject(ABC):
     """
@@ -76,7 +23,7 @@ class _BaseObject(ABC):
     
     @classmethod
     def help(cls) -> str:
-        return interpret_ssml(f"<@heading>{cls.__name__}<@stop>\n{cls.__doc__}")
+        return interpret(f"<@heading>{cls.__name__}<@stop>\n{cls.__doc__}")
 
 class Theme(_BaseObject):
     """
@@ -98,7 +45,7 @@ class Theme(_BaseObject):
         self.__styles.update(styles)
         
     def get_style(self, target: str) -> str:
-        return self.__styles.get(target)
+        return str(self.__styles.get(target))
     
     def __getitem__(self, target: str) -> Any:
         return self.__styles.get(target)
@@ -107,12 +54,15 @@ class Theme(_BaseObject):
         self.__styles[style] = value
 
 DEFAULT_THEME = Theme(
-    info=FG_CYAN, warning=FG_YELLOW, error=FG_RED, success=FG_GREEN, bold=BOLD, dim=DIM, italic=ITALIC, 
-    underline=UNDERLINE, blink=BLINK, inverse=INVERSE, hidden=HIDDEN, strikethrough=STRIKETHROUGH, 
-    fg_black=FG_BLACK, fg_white=FG_WHITE, fg_green=FG_GREEN, fg_yellow=FG_YELLOW, fg_blue=FG_BLUE, 
-    fg_magenta=FG_MAGENTA, fg_cyan=FG_CYAN, bg_black=BG_BLACK, bg_red=BG_RED, bg_blue=BG_BLUE, stop=STOP,
-    bg_green=BG_GREEN, bg_magenta=BG_MAGENTA, bg_cyan=BG_CYAN, bg_white=BG_WHITE, default=DEFAULT,
-    header=BOLD + UNDERLINE, section=INVERSE + UNDERLINE
+    info=ForegroundColors.CYAN, warning=ForegroundColors.YELLOW, error=ForegroundColors.RED, 
+    success=ForegroundColors.GREEN, bold=Styles.BOLD, dim=Styles.DIM, italic=Styles.ITALIC, 
+    underline=Styles.UNDERLINE, blink=Styles.BLINK, inverse=Styles.INVERSE, hidden=Styles.HIDDEN, 
+    strikethrough=Styles.STRIKETHROUGH, fg_black=ForegroundColors.BLACK, fg_white=ForegroundColors.WHITE, 
+    fg_green=ForegroundColors.GREEN, fg_yellow=ForegroundColors.YELLOW, fg_blue=ForegroundColors.BLUE, 
+    fg_magenta=ForegroundColors.MAGENTA, fg_cyan=ForegroundColors.CYAN, bg_black=BackgroundColors.BLACK,
+    bg_red=BackgroundColors.RED, bg_blue=BackgroundColors.BLUE, stop=Other.STOP,
+    bg_green=BackgroundColors.GREEN, bg_magenta=BackgroundColors.MAGENTA, bg_cyan=BackgroundColors.CYAN,
+    bg_white=BackgroundColors.WHITE, default=Styles.DEFAULT, heading=Styles.BOLD + Styles.UNDERLINE
     )
 
 class Console(_BaseObject):
@@ -132,7 +82,7 @@ class Console(_BaseObject):
             self.print_title()
         
     def print_title(self) -> None:
-        self.write(f"<@heading>{self.__title}<@stop>", alignment=CENTER)
+        self.write(f"<@heading>{self.__title}<@stop>", alignment=Other.CENTER.value)
         
     @property
     def theme(self) -> Theme:
@@ -160,19 +110,19 @@ class Console(_BaseObject):
         Returns: None
         """
         
-        print(CLEAR, end="")
+        print(Other.CLEAR, end="")
         if print_title:
             self.print_title()
         
-    def log(self, *objects, end: str = f"{STOP}\n", sep: str = " ", 
-            style: str = "default", alignment: str = LEFT) -> None:
+    def log(self, *objects, end: str = f"{Other.STOP}\n", sep: str = " ", 
+            style: str = "default", alignment: str = Other.LEFT.value) -> None:
         """
         Customized log method.
         
         Args: 
             *objects: Any, 
-            end: str = f"{STOP}\\n",
-            alignment: str = LEFT,
+            end: str = f"{Other.STOP}\\n",
+            alignment: str = Other.LEFT,
             sep: str = " ", 
             style: str = "default"
             
@@ -180,10 +130,10 @@ class Console(_BaseObject):
         """
         
         print(
-        interpret_ssml(self.__align_text(self.__theme.get_style(style) + "".join(map(str, objects)), alignment)), end=end, sep=sep
-            )
+        interpret(self.__align_text(self.__theme.get_style(style) + "".join(map(str, objects)), alignment)),
+        end=end, sep=sep)
             
-    def write(self, *objects: Any, alignment: str = LEFT, end: str = f"{STOP}\n", 
+    def write(self, *objects: Any, alignment: str = Other.LEFT.value, end: str = f"{Other.STOP}\n", 
               sep: str = " ", style: str = "default") -> None:
         """
         Customized print method.
@@ -191,7 +141,7 @@ class Console(_BaseObject):
         Args:
             *objects: Any,
             alignment: str, 
-            end: str = STOP, 
+            end: str = Other.STOP, 
             sep: str = "", 
             style: str
         
@@ -199,23 +149,24 @@ class Console(_BaseObject):
         """
         
         print(
-        interpret_ssml(self.__align_text(self.__theme.get_style(style) + "".join(map(str, objects)), alignment)), end=end, sep=sep
+        interpret(self.__align_text(self.__theme.get_style(style) + "".join(map(str, objects)), alignment)),
+        end=end, sep=sep
             )
         
-    def prompt(self, *objects, end: str = STOP, style: str = "default") -> str:
+    def prompt(self, *objects, end: str = Other.STOP.value, style: str = "default") -> str:
         """
         Customized input method.
         
         Args:
             *objects: Any,
-            end: str = STOP, 
+            end: str = Other.STOP, 
             style: str
         
         Returns: str
         """
         
         try:
-            text = input(interpret_ssml(self.__theme.get_style(style) + "".join(map(str, objects))) + end)
+            text = input(interpret(self.__theme.get_style(style) + "".join(map(str, objects))) + end)
         
         except EOFError:
             return ""
@@ -239,14 +190,14 @@ class Console(_BaseObject):
         
         width = get_terminal_size().columns
         
-        if alignment == CENTER:
+        if alignment == Other.CENTER:
             padding = (width - len(text)) // 2
             return " " * padding + text + " " * (width - len(text) - padding)
         
-        elif alignment == RIGHT:
+        elif alignment == Other.RIGHT:
             return (" " * (width - len(text)) + text).rstrip(" ")
         
-        elif alignment == LEFT:
+        elif alignment == Other.LEFT:
             return (text + " " * (width - len(text))).lstrip(" ")
         
         else:
@@ -267,7 +218,7 @@ class ProgressBar(_BaseObject):
                  symbol: str = "-", delay: float = 1) -> None:
         self.__values = values
         self.__theme = theme
-        self.__symbol = interpret_ssml(symbol)
+        self.__symbol = interpret(symbol)
         self.__delay = delay
         
     @property
@@ -292,7 +243,7 @@ class ProgressBar(_BaseObject):
     
     @symbol.setter
     def symbol(self, new: str) -> None:
-        self.__symbol = interpret_ssml(new)
+        self.__symbol = interpret(new)
         
     @property
     def delay(self) -> float:
@@ -313,7 +264,7 @@ class ProgressBar(_BaseObject):
         """
         
         for _ in range(self.__values):
-            print(self.__theme.get_style(style) + self.__symbol, end=STOP, flush=True)
+            print(self.__theme.get_style(style) + self.__symbol, end=Other.STOP.value, flush=True)
             sleep(self.__delay)
             
 class Table(_BaseObject):
@@ -346,7 +297,7 @@ class Table(_BaseObject):
         interpreted_objects = []
         
         for obj in objects:
-            interpreted_objects.append(interpret_ssml(self.__theme.get_style(style) + str(obj) + STOP))
+            interpreted_objects.append(interpret(self.__theme.get_style(style) + str(obj) + Other.STOP.value))
             
         while len(interpreted_objects) < self.__columns:
             interpreted_objects.append(None)
@@ -395,7 +346,7 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        placeholder = interpret_ssml(self.__theme.get_style(style) + str(placeholder) + STOP)
+        placeholder = interpret(self.__theme.get_style(style) + str(placeholder) + Other.STOP.value)
         
         for row in self.__table:
             row.append(placeholder)
@@ -427,7 +378,7 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        self.__table[row_index][column_index] = interpret_ssml(self.__theme.get_style(style) + str(info) + STOP)
+        self.__table[row_index][column_index] = interpret(self.__theme.get_style(style) + str(info) + Other.STOP.value)
         
     def get_row(self, index: int) -> list:
         """
@@ -474,7 +425,10 @@ class Table(_BaseObject):
         
         for row in self.__table:
             for column in row: 
-                text += f"\"{column}\"{symbol}"
+                if symbol in text:
+                    text += f"\"{column}\"{symbol}"
+                else:
+                    text += f"{column}{symbol}"
                 
             text += "\n"
             

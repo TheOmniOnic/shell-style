@@ -86,9 +86,9 @@ progress.run(style="bold")
 Use `SSML` (Shell-Style Markup Language) in your text to simplify styling:
 
 ```python
-from shell_style import interpret_ssml
+from shell_style.ssml import interpret
 
-print(interpret_ssml("<@bold>This is SSML<@stop>"))
+print(interpret("<@bold>This is SSML<@stop>"))
 console.write("<@bold>This is the same as the above example!<@stop>")
 ```
 

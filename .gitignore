@@ -2,3 +2,5 @@
 /shell_style.egg-info
 /.idea
 /build
+setup.py
+pyproject.toml
