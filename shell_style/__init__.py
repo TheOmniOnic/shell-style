@@ -3,34 +3,33 @@ Shell-Style: A Python Package for styling terminal output.
 Supports ANSI escape codes, tables, progress bars, and more
 """
 
-from sys import stdout
-from warnings import warn
-from os import (getenv, environ)
-from .models import (ProgressBar, DEFAULT_THEME)
+from sys import stdout as _stdout
+from warnings import warn as _warn
+from os import (getenv as _getenv, environ as _environ)
+from .models import (ProgressBar as _ProgressBar, DEFAULT_THEME)
+from re import compile as _compile
 
 # Set __all__
-__all__ = ["rgb_to_ansi", "hex_to_ansi", "run_progress_bar", "DEFAULT_THEME"]
+__all__ = ["rgb_to_ansi", "hex_to_ansi", "run_progress_bar", "DEFAULT_THEME", "strip_ansi"]
 
-# Check whether the terminal is compatible with Shell-STyle    
-compatible = 0
+# Check whether the terminal is compatible with Shell-Style    
+_compatible = 0
 
-if stdout.isatty():
-    compatible += 1
+if _stdout.isatty():
+    _compatible += 1
     
-term = getenv("TERM", "")
+term = _getenv("TERM", "")
 if term and ("xterm" in term or "color" in term):
-    compatible += 1
+    _compatible += 1
     
-if environ.get("COLORTERM", "").lower() in ("truecolor", "24bit"):
-    compatible += 1
+if _environ.get("COLORTERM", "").lower() in ("truecolor", "24bit"):
+    _compatible += 1
     
-if compatible == 1:
-    warn("Warning: This terminal may not be compatible with ShellStyle", Warning)
+if _compatible == 1:
+    _warn("Warning: This terminal may not be compatible with ShellStyle", Warning)
 
-if compatible == 0:
-    warn("Warning: This terminal is probably not compatible with ShellStyle", Warning)
-    
-del (compatible, stdout, getenv, term)
+if _compatible == 0:
+    _warn("Warning: This terminal is probably not compatible with ShellStyle", Warning)
     
 def rgb_to_ansi(red: int, green: int, blue: int, mode: str = "fg") -> str:
     """
@@ -86,8 +85,19 @@ def run_progress_bar(values: int, *, delay: float = 1, symbol: str = "-") -> Non
         Returns: NoReturn
         """
         
-        progress_bar = ProgressBar(values)
+        progress_bar = _ProgressBar(values)
         progress_bar.run()
-        
-del ProgressBar
+
+def strip_ansi(text: str) -> str:
+    """
+    Remove ANSI escape sequences from a string.
+
+    Args:
+        text: str
+
+    Returns: str
+    """
+
+    ansi_escape = _compile(r"\x1b\[[0-9;]*m")
+    return ansi_escape.sub("", text)
         

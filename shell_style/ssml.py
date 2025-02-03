@@ -1,4 +1,11 @@
+"""
+Contains SSML (Shell-Style Markup Language) functionality for the Shell-Style package.
+Defines strip_ansi, interpret, ssml_to_ansi, ansi_to_ssml, html_to_ssml and ssml_to_html
+"""
+
 from .enums import (Styles as _Styles, ForegroundColors as _ForegroundColors, BackgroundColors as _BackgroundColors, Other as _Other)
+
+__all__ = ["interpret", "ssml_to_ansi", "ansi_to_ssml", "html_to_ssml", "ssml_to_html"]
 
 def interpret(text: str, mode: int = 0) -> str:
     """
@@ -24,7 +31,7 @@ def interpret(text: str, mode: int = 0) -> str:
         return html_to_ssml(text)
 
     else:
-        raise ValueError(f"Invalid 'mode' argument: {mode}. Must be between 0 and 3")
+        raise ValueError(f"Invalid \"mode\" argument: {mode}. Must be between 0 and 3")
 
 def ssml_to_ansi(text: str) -> str:
     """
@@ -131,35 +138,35 @@ def ssml_to_html(text: str) -> str:
     """
 
     ssml_to_html_map = {
-        "<@bold>": "<span style='font-weight:bold'>",
-        "<@dim>": "<span style='opacity:0.6'>",
-        "<@italic>": "<span style='font-style:italic'>",
-        "<@underline>": "<span style='text-decoration:underline'>",
-        "<@blink>": "<span style='animation:blink 1s step-end infinite'>",
-        "<@inverse>": "<span style='color:white;background-color:black'>",
-        "<@hidden>": "<span style='visibility:hidden'>",
-        "<@strikethrough>": "<span style='text-decoration:line-through'>",
-        "<@fg_black>": "<span style='color:black'>",
-        "<@fg_red>": "<span style='color:red'>",
-        "<@fg_green>": "<span style='color:green'>",
-        "<@fg_yellow>": "<span style='color:yellow'>",
-        "<@fg_blue>": "<span style='color:blue'>",
-        "<@fg_magenta>": "<span style='color:magenta'>",
-        "<@fg_cyan>": "<span style='color:cyan'>",
-        "<@fg_white>": "<span style='color:white'>",
-        "<@bg_black>": "<span style='background-color:black'>",
-        "<@bg_red>": "<span style='background-color:red'>",
-        "<@bg_green>": "<span style='background-color:green'>",
-        "<@bg_blue>": "<span style='background-color:blue'>",
-        "<@bg_magenta>": "<span style='background-color:magenta'>",
-        "<@bg_cyan>": "<span style='background-color:cyan'>",
-        "<@bg_white>": "<span style='background-color:white'>",
+        "<@bold>": "<span style=\"font-weight:bold\">",
+        "<@dim>": "<span style=\"opacity:0.6\">",
+        "<@italic>": "<span style=\"font-style:italic\">",
+        "<@underline>": "<span style=\"text-decoration:underline\">",
+        "<@blink>": "<span style=\"animation:blink 1s step-end infinite\">",
+        "<@inverse>": "<span style=\"color:white;background-color:black\">",
+        "<@hidden>": "<span style=\"visibility:hidden\">",
+        "<@strikethrough>": "<span style=\"text-decoration:line-through\">",
+        "<@fg_black>": "<span style=\"color:black\">",
+        "<@fg_red>": "<span style=\"color:red\">",
+        "<@fg_green>": "<span style=\"color:green\">",
+        "<@fg_yellow>": "<span style=\"color:yellow\">",
+        "<@fg_blue>": "<span style=\"color:blue\">",
+        "<@fg_magenta>": "<span style=\"color:magenta\">",
+        "<@fg_cyan>": "<span style=\"color:cyan\">",
+        "<@fg_white>": "<span style=\"color:white\">",
+        "<@bg_black>": "<span style=\"background-color:black\">",
+        "<@bg_red>": "<span style=\"background-color:red\">",
+        "<@bg_green>": "<span style=\"background-color:green\">",
+        "<@bg_blue>": "<span style=\"background-color:blue\">",
+        "<@bg_magenta>": "<span style=\"background-color:magenta\">",
+        "<@bg_cyan>": "<span style=\"background-color:cyan\">",
+        "<@bg_white>": "<span style=\"background-color:white\">",
         "<@stop>": "</span>",
-        "<@info>": "<span style='color:cyan'>",
-        "<@success>": "<span style='color:green'>",
-        "<@warning>": "<span style='color:yellow'>",
-        "<@error>": "<span style='color:red'>",
-        "<@heading>": "<span style='font-weight:bold;text-decoration:underline'>"
+        "<@info>": "<span style=\"color:cyan\">",
+        "<@success>": "<span style=\"color:green\">",
+        "<@warning>": "<span style=\"color:yellow\">",
+        "<@error>": "<span style=\"color:red\">",
+        "<@heading>": "<span style=\"font-weight:bold;text-decoration:underline\">"
     }
 
     for ssml, html in ssml_to_html_map.items:
@@ -178,35 +185,35 @@ def html_to_ssml(text: str) -> str:
     """
 
     html_to_ssml_map = {
-        "<span style='font-weight:bold'>": "<@bold>",
-        "<span style='opacity:0.6'>": "<@dim>",
-        "<span style='font-style:italic'>": "<@italic>",
-        "<span style='text-decoration:underline'>": "<@underline>",
-        "<span style='animation:blink 1s step-end infinite'>": "<@blink>",
-        "<span style='color:white;background-color:black'>": "<@inverse>",
-        "<span style='visibility:hidden'>": "<@hidden>",
-        "<span style='text-decoration:line-through'>": "<@strikethrough>",
-        "<span style='color:black'>": "<@fg_black>",
-        "<span style='color:red'>": "<@fg_red>",
-        "<span style='color:green'>": "<@fg_green>",
-        "<span style='color:yellow'>": "<@fg_yellow>",
-        "<span style='color:blue'>": "<@fg_blue>",
-        "<span style='color:magenta'>": "<@fg_magenta>",
-        "<span style='color:cyan'>": "<@fg_cyan>",
-        "<span style='color:white'>": "<@fg_white>",
-        "<span style='background-color:black'>": "<@bg_black>",
-        "<span style='background-color:red'>": "<@bg_red>",
-        "<span style='background-color:green'>": "<@bg_green>",
-        "<span style='background-color:blue'>": "<@bg_blue>",
-        "<span style='background-color:magenta'>": "<@bg_magenta>",
-        "<span style='background-color:cyan'>": "<@bg_cyan>",
-        "<span style='background-color:white'>": "<@bg_white>",
+        "<span style=\"font-weight:bold\">": "<@bold>",
+        "<span style=\"opacity:0.6\">": "<@dim>",
+        "<span style=\"font-style:italic\">": "<@italic>",
+        "<span style=\"text-decoration:underline\">": "<@underline>",
+        "<span style=\"animation:blink 1s step-end infinite\">": "<@blink>",
+        "<span style=\"color:white;background-color:black\">": "<@inverse>",
+        "<span style=\"visibility:hidden\">": "<@hidden>",
+        "<span style=\"text-decoration:line-through\">": "<@strikethrough>",
+        "<span style=\"color:black\">": "<@fg_black>",
+        "<span style=\"color:red\">": "<@fg_red>",
+        "<span style=\"color:green\">": "<@fg_green>",
+        "<span style=\"color:yellow\">": "<@fg_yellow>",
+        "<span style=\"color:blue\">": "<@fg_blue>",
+        "<span style=\"color:magenta\">": "<@fg_magenta>",
+        "<span style=\"color:cyan\">": "<@fg_cyan>",
+        "<span style=\"color:white\">": "<@fg_white>",
+        "<span style=\"background-color:black\">": "<@bg_black>",
+        "<span style=\"background-color:red\">": "<@bg_red>",
+        "<span style=\"background-color:green\">": "<@bg_green>",
+        "<span style=\"background-color:blue\">": "<@bg_blue>",
+        "<span style=\"background-color:magenta\">": "<@bg_magenta>",
+        "<span style=\"background-color:cyan\">": "<@bg_cyan>",
+        "<span style=\"background-color:white\">": "<@bg_white>",
         "</span>": "<@stop>",
-        "<span style='color:cyan'>": "<@info>",
-        "<span style='color:green'>": "<@success>",
-        "<span style='color:yellow'>": "<@warning>",
-        "<span style='color:red'>": "<@error>",
-        "<span style='font-weight:bold;text-decoration:underline'>": "<@heading>"
+        "<span style=\"color:cyan\">": "<@info>",
+        "<span style=\"color:green\">": "<@success>",
+        "<span style=\"color:yellow\">": "<@warning>",
+        "<span style=\"color:red\">": "<@error>",
+        "<span style=\"font-weight:bold;text-decoration:underline\">": "<@heading>"
     }
 
     for html, ssml in html_to_ssml_map.items:

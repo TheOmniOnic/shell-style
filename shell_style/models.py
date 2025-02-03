@@ -14,7 +14,7 @@ __all__ = ["Theme", "Console", "Table", "ProgressBar", "DEFAULT_THEME"]
 
 class _BaseObject(_ABC):
     """
-    Abstract Base Class for all _Other classes defined here.
+    Abstract Base Class for all other classes defined here.
     Defines the help method.
     
     Args: None
@@ -33,36 +33,56 @@ class Theme(_BaseObject):
     """
     
     def __init__(self, **styles) -> None:
-        self._styles = styles
+        self.__styles = styles
         
     @property
     def styles(self) -> dict[str, str]:
-        return self._styles
+        return self.__styles
     
     @styles.setter
     def styles(self, styles: dict[str, str]) -> None:
-        self._styles.update(styles)
+        self.__styles.update(styles)
         
     def get_style(self, target: str) -> str:
-        return str(self._styles.get(target))
+        return str(self.__styles.get(target))
     
     def __getitem__(self, target: str) -> _Any:
-        return self._styles.get(target)
+        return self.__styles.get(target)
     
     def __setitem__(self, style: str, value: str) -> None:
-        self._styles[style] = value
+        self.__styles[style] = value
 
 DEFAULT_THEME = Theme(
-    info=_ForegroundColors.CYAN, warning=_ForegroundColors.YELLOW, error=_ForegroundColors.RED, 
-    success=_ForegroundColors.GREEN, bold=_Styles.BOLD, dim=_Styles.DIM, italic=_Styles.ITALIC, 
-    underline=_Styles.UNDERLINE, blink=_Styles.BLINK, inverse=_Styles.INVERSE, hidden=_Styles.HIDDEN, 
-    strikethrough=_Styles.STRIKETHROUGH, fg_black=_ForegroundColors.BLACK, fg_white=_ForegroundColors.WHITE, 
-    fg_green=_ForegroundColors.GREEN, fg_yellow=_ForegroundColors.YELLOW, fg_blue=_ForegroundColors.BLUE, 
-    fg_magenta=_ForegroundColors.MAGENTA, fg_cyan=_ForegroundColors.CYAN, bg_black=_BackgroundColors.BLACK,
-    bg_red=_BackgroundColors.RED, bg_blue=_BackgroundColors.BLUE, stop=_Other.STOP,
-    bg_green=_BackgroundColors.GREEN, bg_magenta=_BackgroundColors.MAGENTA, bg_cyan=_BackgroundColors.CYAN,
-    bg_white=_BackgroundColors.WHITE, default=_Styles.DEFAULT, heading=_Styles.BOLD + _Styles.UNDERLINE
-    )
+    info=_ForegroundColors.CYAN.value, 
+    warning=_ForegroundColors.YELLOW.value, 
+    error=_ForegroundColors.RED.value, 
+    success=_ForegroundColors.GREEN.value, 
+    bold=_Styles.BOLD.value, 
+    dim=_Styles.DIM.value, 
+    italic=_Styles.ITALIC.value, 
+    underline=_Styles.UNDERLINE.value, 
+    blink=_Styles.BLINK.value, 
+    inverse=_Styles.INVERSE.value, 
+    hidden=_Styles.HIDDEN.value, 
+    strikethrough=_Styles.STRIKETHROUGH.value, 
+    fg_black=_ForegroundColors.BLACK.value, 
+    fg_white=_ForegroundColors.WHITE.value, 
+    fg_green=_ForegroundColors.GREEN.value, 
+    fg_yellow=_ForegroundColors.YELLOW.value, 
+    fg_blue=_ForegroundColors.BLUE.value, 
+    fg_magenta=_ForegroundColors.MAGENTA.value, 
+    fg_cyan=_ForegroundColors.CYAN.value, 
+    bg_black=_BackgroundColors.BLACK.value,
+    bg_red=_BackgroundColors.RED.value, 
+    bg_blue=_BackgroundColors.BLUE.value, 
+    stop=_Other.STOP.value,
+    bg_green=_BackgroundColors.GREEN.value, 
+    bg_magenta=_BackgroundColors.MAGENTA.value, 
+    bg_cyan=_BackgroundColors.CYAN.value,
+    bg_white=_BackgroundColors.WHITE.value, 
+    default=_Styles.DEFAULT.value, 
+    heading=_Styles.BOLD.value + _Styles.UNDERLINE.value
+)
 
 class Console(_BaseObject):
     """
@@ -81,7 +101,7 @@ class Console(_BaseObject):
             self.print_title()
         
     def print_title(self) -> None:
-        self.write(f"<@heading>{self.__title}<@stop>", alignment=_Other.CENTER)
+        self.write(f"<@heading>{self.__title}<@stop>", alignment=_Other.CENTER.value)
         
     @property
     def theme(self) -> Theme:
@@ -109,19 +129,19 @@ class Console(_BaseObject):
         Returns: None
         """
         
-        print(_Other.CLEAR, end="")
+        print(_Other.CLEAR.value, end="")
         if print_title:
             self.print_title()
         
-    def log(self, *objects, end: str = f"{_Other.STOP}\n", sep: str = " ", 
-            style: str = "default", alignment: str = _Other.LEFT) -> None:
+    def log(self, *objects, end: str = f"{_Other.STOP.value}\n", sep: str = " ", 
+            style: str = "default", alignment: str = _Other.LEFT.value) -> None:
         """
         Customized log method.
         
         Args: 
             *objects: _Any, 
-            end: str = f"{_Other.STOP}\\n",
-            alignment: str = _Other.LEFT,
+            end: str = f"{_Other.STOP.value}\\n",
+            alignment: str = _Other.LEFT.value,
             sep: str = " ", 
             style: str = "default"
             
@@ -132,7 +152,7 @@ class Console(_BaseObject):
         _interpret(self.__align_text(self.__theme.get_style(style) + "".join(map(str, objects)), alignment)),
         end=end, sep=sep)
             
-    def write(self, *objects: _Any, alignment: str = _Other.LEFT, end: str = f"{_Other.STOP}\n", 
+    def write(self, *objects: _Any, alignment: str = _Other.LEFT.value, end: str = f"{_Other.STOP.value}\n", 
               sep: str = " ", style: str = "default") -> None:
         """
         Customized print method.
@@ -140,7 +160,7 @@ class Console(_BaseObject):
         Args:
             *objects: _Any,
             alignment: str, 
-            end: str = _Other.STOP, 
+            end: str = _Other.STOP.value, 
             sep: str = "", 
             style: str
         
@@ -152,23 +172,23 @@ class Console(_BaseObject):
         end=end, sep=sep
             )
         
-    def prompt(self, *objects, end: str = _Other.STOP, style: str = "default") -> str:
+    def prompt(self, *objects, end: str = _Other.STOP.value, style: str = "default") -> str:
         """
         Customized input method.
         
         Args:
             *objects: _Any,
-            end: str = _Other.STOP, 
+            end: str = _Other.STOP.value, 
             style: str
         
         Returns: str
         """
         
         try:
-            text = input(_interpret(self.__theme.get_style(style) + "".join(map(str, objects))) + end)
+            text = input(_interpret(self.__theme.get_style(style) + "".join(obj for obj in objects) + end))
         
-        except (EOFError, KeyboardInterrupt):
-            return ""
+        except Exception as error:
+            return repr(error)
         
         else:
             return text
@@ -189,14 +209,14 @@ class Console(_BaseObject):
         
         width = _get_terminal_size().columns
         
-        if alignment == _Other.CENTER:
+        if alignment == _Other.CENTER.value:
             padding = (width - len(text)) // 2
             return " " * padding + text + " " * (width - len(text) - padding)
         
-        elif alignment == _Other.RIGHT:
+        elif alignment == _Other.RIGHT.value:
             return (" " * (width - len(text)) + text).rstrip(" ")
         
-        elif alignment == _Other.LEFT:
+        elif alignment == _Other.LEFT.value:
             return (text + " " * (width - len(text))).lstrip(" ")
         
         else:
@@ -263,7 +283,7 @@ class ProgressBar(_BaseObject):
         """
         
         for _ in range(self.__values):
-            print(self.__theme.get_style(style) + self.__symbol, end=_Other.STOP, flush=True)
+            print(self.__theme.get_style(style) + self.__symbol, end=_Other.STOP.value, flush=True)
             _sleep(self.__delay)
             
 class Table(_BaseObject):
@@ -296,7 +316,7 @@ class Table(_BaseObject):
         interpreted_objects = []
         
         for obj in objects:
-            interpreted_objects.append(_interpret(self.__theme.get_style(style) + str(obj) + _Other.STOP))
+            interpreted_objects.append(_interpret(self.__theme.get_style(style) + str(obj) + _Other.STOP.value))
             
         while len(interpreted_objects) < self.__columns:
             interpreted_objects.append(None)
@@ -345,7 +365,7 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        placeholder = _interpret(self.__theme.get_style(style) + str(placeholder) + _Other.STOP)
+        placeholder = _interpret(self.__theme.get_style(style) + str(placeholder) + _Other.STOP.value)
         
         for row in self.__table:
             row.append(placeholder)
@@ -377,7 +397,7 @@ class Table(_BaseObject):
         Returns: None
         """
         
-        self.__table[row_index][column_index] = _interpret(self.__theme.get_style(style) + str(info) + _Other.STOP)
+        self.__table[row_index][column_index] = _interpret(self.__theme.get_style(style) + str(info) + _Other.STOP.value)
         
     def get_row(self, index: int) -> list:
         """
@@ -403,13 +423,15 @@ class Table(_BaseObject):
         return_str = ""
         
         for row in self.__table:
-            return_str += "| " + " | ".join(str(cell) if cell is not None else "" for cell in row) + " |" + "\n"
+            for column in row:
+                return_str += f"| {column} |"
+            return_str += "\n"
             
         return return_str
     
     def display(self) -> None:
         print(self.get_table())
-        
+
     def symbol_separated_values(self, symbol: str = ",") -> str:
         """
         Turn self.__table into a symbol separated format, like CSV, TSV, SSV or PSV.
@@ -424,7 +446,7 @@ class Table(_BaseObject):
         
         for row in self.__table:
             for column in row: 
-                if symbol in text:
+                if symbol in column:
                     text += f"\"{column}\"{symbol}"
                 else:
                     text += f"{column}{symbol}"

@@ -4,7 +4,9 @@ background, foreground, style and other escape
 codes, along with some miscellaneous ones.
 """
 
-from enum import Enum as _Enum
+from enum import (Enum as _Enum)
+
+__all__ = ["Styles", "BackgroundColors", "ForegroundColors", "Other"]
 
 class Styles(_Enum):
     DEFAULT = "\033[39m"
