@@ -24,10 +24,10 @@ def _process(type: str, input: str, output: str) -> None:
             mode = 0
 
         case "ssml-to-html":
-            mode = 1
+            mode = 2
 
         case "ansi-to-ssml":
-            mode = 2
+            mode = 1
 
         case "html-to-ssml":
             mode = 3

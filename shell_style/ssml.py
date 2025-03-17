@@ -18,20 +18,21 @@ def interpret(text: str, mode: int = 0) -> str:
     Returns: str 
     """
     
-    if mode == 0:
-        return ssml_to_ansi(text)
-    
-    elif mode == 1:
-        return ansi_to_ssml(text)
-    
-    elif mode == 2:
-        return ssml_to_html(text)
-    
-    elif mode == 3:
-        return html_to_ssml(text)
+    match mode:
+        case 0:
+            return ssml_to_ansi(text)
+        
+        case 1:
+            return ansi_to_ssml(text)
+        
+        case 2:
+            return ssml_to_html(text)
+        
+        case 3:
+            return html_to_ssml(text)
 
-    else:
-        raise ValueError(f"Invalid \"mode\" argument: {mode}. Must be between 0 and 3")
+        case _:
+            raise ValueError(f"Invalid \"mode\" argument: {mode}. Must be between 0 and 3")
 
 def ssml_to_ansi(text: str) -> str:
     """
