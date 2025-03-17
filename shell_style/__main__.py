@@ -33,7 +33,7 @@ def _process(type: str, input: str, output: str) -> None:
             mode = 3
 
     with open(output, "w") as file:
-        file.write(interpret(input, mode))
+        file.write(interpret(open(input, "r").read(), mode))
 
 def _main() -> None:
     parser = _ArgumentParser(description="The Shell-Style CLI")
